@@ -54,7 +54,7 @@ def game_loop():
     pygame.mixer.music.play(-1)
 
     snake_list = []
-    snake_length = 10
+    snake_length = 1
     game_exit = False
     game_over = False
     lead_x = display_width/2
@@ -82,6 +82,7 @@ def game_loop():
 
                 if event.type == pygame.QUIT:
                     game_exit = True
+                    game_over = False
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
@@ -136,8 +137,8 @@ def game_loop():
         gameDisplay.fill(white)
 
         # apple
-
-        pygame.draw.rect(gameDisplay, red, [rand_apple_x, rand_apple_y, block_size, block_size])
+        apple_thickness = 30
+        pygame.draw.rect(gameDisplay, red, [rand_apple_x, rand_apple_y, apple_thickness, apple_thickness])
 
 
         # snake
@@ -152,6 +153,12 @@ def game_loop():
         if len(snake_list) > snake_length:
             del snake_list[0]
 
+
+        for point in snake_list[:-1]:
+            
+            if point == snake_head:
+                game_over = True
+
         snake(block_size, snake_list)
         # alternative to using pygame.draw.rect. fill can be graphics accelerated.
         # gameDisplay.fill(black, rect=[200, 200, 50, 50])
@@ -161,9 +168,28 @@ def game_loop():
         pygame.display.update()
 
 
-        if lead_x == rand_apple_x and lead_y == rand_apple_y:
-            rand_apple_x = round(random.randrange(0, display_width-block_size)/10)*10
-            rand_apple_y = round(random.randrange(0, display_height-block_size)/10)*10
+        # COLLISION DETECTION
+
+        # if lead_x == rand_apple_x and lead_y == rand_apple_y:
+        #     rand_apple_x = round(random.randrange(0, display_width-block_size)/10)*10
+        #     rand_apple_y = round(random.randrange(0, display_height-block_size)/10)*10
+        #     snake_length += 1
+
+        
+        # if (lead_x >= rand_apple_x and lead_x <= (rand_apple_x + apple_thickness)):
+        #     if (lead_y >= rand_apple_y and lead_y <= (rand_apple_y + apple_thickness)):
+        #         rand_apple_x = round(random.randrange(0, display_width-block_size))
+        #         rand_apple_y = round(random.randrange(0, display_height-block_size))
+        #         snake_length += 1
+
+
+        if lead_x > rand_apple_x and lead_x < rand_apple_x + apple_thickness or (lead_x + block_size > rand_apple_x and lead_x + block_size < rand_apple_x + apple_thickness):
+            if lead_y > rand_apple_y and lead_y < rand_apple_y + apple_thickness or (lead_y + block_size > rand_apple_y and lead_y + block_size < rand_apple_y + apple_thickness):
+                rand_apple_x = round(random.randrange(0, display_width-block_size))
+                rand_apple_y = round(random.randrange(0, display_height-block_size))
+                snake_length += 1
+                
+ 
 
         # specify the frames per second that you want to have
         clock.tick(FPS)
