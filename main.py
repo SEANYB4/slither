@@ -20,6 +20,8 @@ clock = pygame.time.Clock()
 block_size = 10
 FPS = 30
 
+direction = 'right'
+
 
 # computer screens have a backlight, 
 
@@ -27,6 +29,8 @@ FPS = 30
 
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Slither')
+
+img = pygame.image.load('snakehead.png')
 
 #  pygame.display.flip() is interchangeable with display.update() when used with no parameters, updates the entire surface
 
@@ -36,22 +40,46 @@ font = pygame.font.SysFont(None, 25)
 # FUNCTIONS
 
 def snake(block_size, snake_list):
-    for XnY in snake_list:
+
+
+    if direction == 'right':
+        head = pygame.transform.rotate(img, 270)
+
+    elif direction == 'left':
+        head = pygame.transform.rotate(img, 90)
+
+    elif direction == 'up':
+        head = img
+
+    elif direction == 'down':
+        head = pygame.transform.rotate(img, 180)
+
+    gameDisplay.blit(head, (snake_list[-1][0], snake_list[-1][1]))
+    for XnY in snake_list[:-1]:
         pygame.draw.rect(gameDisplay, green, [XnY[0], XnY[1], block_size, block_size])
+
+def text_objects(text, color):
+    text_surface = font.render(text, True, color)
+    return text_surface, text_surface.get_rect()
+
+
 
     
 
 def message_to_screen(msg, color): 
-    screen_text = font.render(msg, True, color)
-    gameDisplay.blit(screen_text, [display_width/2, display_height/2])
-
+    # screen_text = font.render(msg, True, color)
+    # gameDisplay.blit(screen_text, [display_width/2, display_height/2])
+    text_surface, text_rect = text_objects(msg, color)
+    text_rect.center = (display_width/2), (display_height/2)
+    gameDisplay.blit(text_surface, text_rect)
 
 def game_loop():
-
+    # global keyword allows you to modify a variable within a function
+    global direction 
 
     pygame.mixer.init()
     pygame.mixer.music.load('snake.mp3')
-    pygame.mixer.music.play(-1)
+    # pygame.mixer.music.play(-1)
 
     snake_list = []
     snake_length = 1
@@ -59,7 +87,7 @@ def game_loop():
     game_over = False
     lead_x = display_width/2
     lead_y = display_height/2
-    lead_x_change = 0
+    lead_x_change = 10
     lead_y_change = 0
 
     rand_apple_x = round(random.randrange(0, display_width-block_size)/10)*10
@@ -99,15 +127,19 @@ def game_loop():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
+                    direction = 'left'
                     lead_x_change = -block_size
                     lead_y_change = 0 
                 elif event.key == pygame.K_RIGHT:
+                    direction = 'right'
                     lead_x_change = block_size
                     lead_y_change = 0
                 elif event.key == pygame.K_UP:
+                    direction = 'up'
                     lead_y_change = -block_size
                     lead_x_change = 0
                 elif event.key == pygame.K_DOWN:
+                    direction = 'down'
                     lead_y_change = block_size
                     lead_x_change = 0
 
