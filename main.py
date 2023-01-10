@@ -50,7 +50,23 @@ mediumfont = pygame.font.SysFont('comicsansms', 50)
 largefont = pygame.font.SysFont('comicsansms', 80)
 
 
+
+
 # FUNCTIONS
+
+
+def pause():
+
+    paused = True
+
+    while paused:
+        for event in  
+
+
+def score(score):
+
+    text = smallfont.render("Score: " + str(score), True, white)
+    gameDisplay.blit(text, [0, 0])
 
 
 def game_intro():
@@ -279,6 +295,8 @@ def game_loop():
         # alternative to using pygame.draw.rect. fill can be graphics accelerated.
         # gameDisplay.fill(black, rect=[200, 200, 50, 50])
 
+
+        score((snake_length-1) * 10)
 
         # draw everything and then render to save resources
         pygame.display.update()
