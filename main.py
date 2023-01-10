@@ -4,6 +4,7 @@ import random
 
 pygame.init() # returns a tuple of successful and unsuccessful initialisations
 
+
 #  VARIABLES
 
 # to define colors you give the RGB values, can be given in a list or a tuple
@@ -17,11 +18,13 @@ green = (0, 155, 0)
 display_width = 800
 display_height = 600
 clock = pygame.time.Clock()
-block_size = 10
+block_size = 20
 FPS = 30
 
 direction = 'right'
 
+# apple
+apple_thickness = 30
 
 # computer screens have a backlight, 
 
@@ -30,14 +33,74 @@ direction = 'right'
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Slither')
 
+
+icon = pygame.image.load('snakehead.png')
+
+# best size for icons is 32 x 32 
+pygame.display.set_icon(icon)
+
 img = pygame.image.load('snakehead.png')
+
+apple_img = pygame.image.load('apple.png')
 
 #  pygame.display.flip() is interchangeable with display.update() when used with no parameters, updates the entire surface
 
-font = pygame.font.SysFont(None, 25)
+smallfont = pygame.font.SysFont('comicsansms', 25)
+mediumfont = pygame.font.SysFont('comicsansms', 50)
+largefont = pygame.font.SysFont('comicsansms', 80)
 
 
 # FUNCTIONS
+
+
+def game_intro():
+
+    intro = True
+    while intro:
+
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    intro = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+
+
+        gameDisplay.fill(white)
+        message_to_screen("Welcome to Slither",
+                            green,
+                            -100,
+                            'large')
+        message_to_screen('The objective of the game is to eat red apples',
+                            black,
+                            -30)
+
+        message_to_screen('The more apples you eat, the longer your snake gets.',
+                            black,
+                            10)
+
+
+        message_to_screen('If you run into yourself or the edges, then game over!',
+                            black,
+                            50)
+
+        message_to_screen('Press C to play or Q to quit.',
+        black,
+        180)
+
+        pygame.display.update()
+        clock.tick(15)
+
+
+
 
 def snake(block_size, snake_list):
 
@@ -58,19 +121,39 @@ def snake(block_size, snake_list):
     for XnY in snake_list[:-1]:
         pygame.draw.rect(gameDisplay, green, [XnY[0], XnY[1], block_size, block_size])
 
-def text_objects(text, color):
-    text_surface = font.render(text, True, color)
+
+
+def rand_apple_gen():
+
+
+    rand_apple_x = round(random.randrange(0, display_width-apple_thickness))
+    rand_apple_y = round(random.randrange(0, display_height-apple_thickness))
+
+    return rand_apple_x, rand_apple_y
+    
+
+def text_objects(text, color, size):
+    if size == 'small':
+        text_surface = smallfont.render(text, True, color)
+
+    elif size == 'medium':
+        text_surface = mediumfont.render(text, True, color)
+
+    elif size == 'large':
+        text_surface = largefont.render(text, True, color)
+
+
     return text_surface, text_surface.get_rect()
 
 
 
     
 
-def message_to_screen(msg, color): 
+def message_to_screen(msg, color, y_displace=0, size = 'small'): 
     # screen_text = font.render(msg, True, color)
     # gameDisplay.blit(screen_text, [display_width/2, display_height/2])
-    text_surface, text_rect = text_objects(msg, color)
-    text_rect.center = (display_width/2), (display_height/2)
+    text_surface, text_rect = text_objects(msg, color, size)
+    text_rect.center = (display_width/2), (display_height/2) + y_displace
     gameDisplay.blit(text_surface, text_rect)
 
 def game_loop():
@@ -87,13 +170,12 @@ def game_loop():
     game_over = False
     lead_x = display_width/2
     lead_y = display_height/2
-    lead_x_change = 10
+    lead_x_change = 0
     lead_y_change = 0
 
-    rand_apple_x = round(random.randrange(0, display_width-block_size)/10)*10
-    rand_apple_y = round(random.randrange(0, display_height-block_size)/10)*10
 
 
+    rand_apple_x, rand_apple_y = rand_apple_gen()
     
 
     #  GAME LOOP
@@ -101,7 +183,8 @@ def game_loop():
 
         while game_over == True:
             gameDisplay.fill(white)
-            message_to_screen('Game Over. Press C to play again or Q to quit.', red)
+            message_to_screen('Game Over', red, y_displace = -50, size='large')
+            message_to_screen("Press C to play again or Q to quit.", black, 5, size='medium')
             pygame.display.update()
 
             # event loop
@@ -166,11 +249,12 @@ def game_loop():
 
 
         # draw everything and then render to save resources
-        gameDisplay.fill(white)
+        gameDisplay.fill(black)
 
-        # apple
-        apple_thickness = 30
-        pygame.draw.rect(gameDisplay, red, [rand_apple_x, rand_apple_y, apple_thickness, apple_thickness])
+        
+        
+        gameDisplay.blit(apple_img, [rand_apple_x, rand_apple_y])
+        # pygame.draw.rect(gameDisplay, red, [rand_apple_x, rand_apple_y, apple_thickness, apple_thickness])
 
 
         # snake
@@ -217,8 +301,7 @@ def game_loop():
 
         if lead_x > rand_apple_x and lead_x < rand_apple_x + apple_thickness or (lead_x + block_size > rand_apple_x and lead_x + block_size < rand_apple_x + apple_thickness):
             if lead_y > rand_apple_y and lead_y < rand_apple_y + apple_thickness or (lead_y + block_size > rand_apple_y and lead_y + block_size < rand_apple_y + apple_thickness):
-                rand_apple_x = round(random.randrange(0, display_width-block_size))
-                rand_apple_y = round(random.randrange(0, display_height-block_size))
+                rand_apple_x, rand_apple_y = rand_apple_gen()
                 snake_length += 1
                 
  
@@ -234,7 +317,7 @@ def game_loop():
     pygame.quit() # unintialises pygame
     quit() # exits out of python
 
-
+game_intro()
 game_loop()
 
 
